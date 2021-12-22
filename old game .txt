@@ -1,0 +1,102 @@
+int numGuesses;
+        int numLetters;
+        Scanner input;
+        input = new Scanner(System.in);
+        String str;
+        do {
+            System.out.println("how long of a word do you want to guess?");
+            str = input.nextLine();
+            numLetters = Integer.parseInt(str);
+            if (this.f.getWordFam(numLetters) == null) {
+                System.out.println("invalid length, try again");
+            } else {
+                this.wordFamily = this.f.getWordFam(numLetters); // saves word family of specified length
+            }
+        }while(this.f.getWordFam(numLetters) == null);
+
+        this.guess = new char[numLetters];
+        for(int i = 0; i < numLetters; i++){
+            this.guess[i] = '-'; // fill it with hyphens/other blank char [-,-,-,-]
+        }
+
+        //System.out.println(this.guess);
+        do {
+            System.out.println("how many guesses do you want?");
+            str = input.nextLine();
+            numGuesses = Integer.parseInt(str);
+        } while (numGuesses <= 0);
+
+        boolean running = true;
+        do {
+            System.out.println("do you want to see the remaining number or words in the word family? " +
+                    "type 'yes' or 'no'" );
+            str = input.nextLine().toLowerCase();
+
+            if (str.equalsIgnoreCase("yes")) {
+                this.showRemainingWords = true;
+                running = false;
+            }
+            else if (str.equalsIgnoreCase("no")) {
+                this.showRemainingWords = false;
+                running = false;
+            }
+        }while(running);
+
+        System.out.println("Starting Game...");
+
+        Random rng = new Random();
+
+        System.out.println(this.guess);
+
+        while(true){
+            System.out.print("Currently: ");
+            System.out.print(this.guess + "\n");
+            System.out.println("Used letters: " + this.guessedLetters);
+            System.out.println("You have " + numGuesses + " guesses remaining");
+            if(this.showRemainingWords){
+                System.out.println("words remaining in word family: " + this.wordFamily.size());
+            }
+
+            String currentGuess = "  ";
+            while(currentGuess.length() != 1 && !Character.isLetter(currentGuess.charAt(0))
+                    && this.guessedLetters.contains(currentGuess.charAt(0))){
+                System.out.println("Input your guess: "); // start allowing players to guess letter by letter
+                currentGuess = input.nextLine();
+                if (currentGuess.length() != 1 || !Character.isLetter(currentGuess.charAt(0))
+                        || this.guessedLetters.contains(currentGuess.charAt(0))) {
+                    System.out.println("Invalid input, guess a single letter that has not been guessed yet");
+                }
+            }
+
+            char c = currentGuess.charAt(0);
+            this.guessedLetters.add(c);
+
+            String tempKey = editWordFamily(c);
+            if (tempKey == null){
+                numGuesses--;
+            }
+
+            else{
+                char[] keyArrayForm = tempKey.toCharArray();
+                int counter = 0;
+                for(int i = 0; i < tempKey.length(); i++){
+                    if(this.guess[i] != keyArrayForm[i] && keyArrayForm[i] != '-'){
+                        this.guess[i] = keyArrayForm[i];
+                    }
+                    if (this.guess[i] != '-'){
+                        counter++;
+                    }
+                }
+                if (counter == numLetters){
+                    System.out.println("Congrats! you win");
+                    break;
+                }
+            }
+            if (numGuesses == 0){
+                System.out.println("Game over, you lose\n correct word was: " +
+                        this.wordFamily.get(rng.nextInt(this.wordFamily.size())));
+                break;
+            }
+
+        }
+        input.close(); // end
